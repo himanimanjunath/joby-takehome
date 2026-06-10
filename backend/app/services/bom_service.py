@@ -10,6 +10,7 @@ from app.schemas.bom import (
     BomTreeRow,
     PartDetail,
     PartSearchResult,
+    WhereUsedRow,
 )
 
 
@@ -441,6 +442,52 @@ class BomService:
             root_mass_g=root_mass_g,
             parts=parts,
         )
+
+    # ------------------------------------------------------------------
+    # Where-Used (parent assemblies)
+    # ------------------------------------------------------------------
+
+    def get_where_used(
+        self,
+        conn,
+        part_number: str,
+        check_time: Optional[datetime] = None,
+    ) -> List[WhereUsedRow]:
+        if check_time is None:
+            check_time = _now()
+
+        part_physicalid = self._resolve_physicalid(conn, part_number, check_time)
+        if part_physicalid is None:
+            return []
+
+        sql = """
+        SELECT
+            pa.identity      AS part_number,
+            pa.description   AS part_description,
+            r.child_quantity AS child_quantity
+        FROM bom_relationships r
+        JOIN part_attributes pa
+            ON r.parent_physicalid = pa.physicalid
+            AND %(check_time)s >= pa.valid_from
+            AND %(check_time)s < COALESCE(pa.valid_to, '9999-12-31'::timestamptz)
+        WHERE r.child_physicalid = %(part_physicalid)s
+            AND %(check_time)s >= r.valid_from
+            AND %(check_time)s < COALESCE(r.valid_to, '9999-12-31'::timestamptz)
+        ORDER BY pa.identity
+        """
+        params = {"part_physicalid": part_physicalid, "check_time": check_time}
+        with conn.cursor(row_factory=dict_row) as cur:
+            cur.execute(sql, params)
+            rows = cur.fetchall()
+
+        return [
+            WhereUsedRow(
+                part_number=r.get("part_number"),
+                part_description=r.get("part_description"),
+                child_quantity=r.get("child_quantity"),
+            )
+            for r in rows
+        ]
 
     # ------------------------------------------------------------------
     # Part Search

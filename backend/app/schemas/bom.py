@@ -77,6 +77,18 @@ class BomStatisticsResponse(BaseModel):
     parts: List[BomStatsPart] = []
 
 
+class WhereUsedRow(BaseModel):
+    """One row in the where-used view.
+
+    part_number: the part number of the parent assembly.
+    part_description: the description of the parent assembly.
+    child_quantity: the quantity of this part in the parent assembly.
+    """
+    part_number: Optional[str] = None
+    part_description: Optional[str] = None
+    child_quantity: Optional[int] = None
+
+
 # ---------------------------------------------------------------------------
 # Part detail & search (/parts/*)
 # ---------------------------------------------------------------------------

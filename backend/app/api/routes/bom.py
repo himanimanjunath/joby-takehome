@@ -8,6 +8,7 @@ from app.core.database import get_pool
 from app.schemas.bom import (
     BomStatisticsResponse,
     BomTreeRow,
+    WhereUsedRow,
 )
 from app.services.bom_service import BomFilters, BomService
 
@@ -118,6 +119,22 @@ def get_bom_statistics(
                 part_number,
                 check_time or _now(),
                 filters,
+            )
+    except psycopg.OperationalError as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}")
+
+
+@router.get("/bom/where-used", response_model=List[WhereUsedRow])
+def get_where_used(
+    part_number: str = Query(..., description="Child part identity"),
+    check_time: Optional[datetime] = Query(None),
+) -> List[WhereUsedRow]:
+    try:
+        with get_pool().connection() as conn:
+            return _bom.get_where_used(
+                conn,
+                part_number,
+                check_time or _now(),
             )
     except psycopg.OperationalError as exc:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}")
