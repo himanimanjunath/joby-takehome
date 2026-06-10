@@ -512,7 +512,14 @@ export default function DataChart() {
              <ResponsiveContainer width="100%" height={240}>
                <BarChart data={mfgClassChartData as unknown[]}>
                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                 <XAxis 
+                  dataKey="label" 
+                  tick={{ fontSize: 12 }} 
+                  interval={0}
+                  angle={-30}
+                  textAnchor="end"
+                  height={90}
+                  />
                  <YAxis tick={{ fontSize: 12 }} />
                  <Tooltip />
                  <Bar
