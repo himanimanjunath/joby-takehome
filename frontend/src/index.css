@@ -1,0 +1,61 @@
+*, *::before, *::after { box-sizing: border-box; }
+
+:root {
+  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+
+  /* Surfaces */
+  --bg: #f8fafc;
+  --surface: #ffffff;
+  --border: #e2e8f0;
+
+  /* Text */
+  --text: #334155;
+  --text-muted: #64748b;
+  --text-subtle: #94a3b8;
+  --text-heading: #0f172a;
+
+  /* Primary interactive (blue) */
+  --blue: #3b82f6;
+  --blue-dark: #2563eb;
+  --blue-faint: rgba(59, 130, 246, 0.08);
+
+  /* Source (red) — used for compare source side */
+  --src: #ef4444;
+  --src-text: #7f1d1d;
+  --src-bg: rgba(239, 68, 68, 0.1);
+  --src-border: rgba(239, 68, 68, 0.25);
+
+  /* Target (green) — used for compare target side */
+  --tgt: #22c55e;
+  --tgt-text: #14532d;
+  --tgt-bg: rgba(34, 197, 94, 0.1);
+  --tgt-border: rgba(34, 197, 94, 0.25);
+
+  /* Status colours (kept for health badges / error cards) */
+  --green: #22c55e;
+  --red: #ef4444;
+  --amber: #f59e0b;
+
+  /* Chart palette */
+  --chart-1: #6366f1;
+  --chart-2: #0ea5e9;
+  --chart-heatmap: #6366f1;
+}
+
+body {
+  margin: 0;
+  font: 15px/1.6 var(--sans);
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 { font-size: 1.6rem; font-weight: 600; color: var(--text-heading); margin: 0 0 0.5rem; }
+h2 { font-size: 1.1rem; font-weight: 600; color: var(--text-heading); margin: 0 0 0.25rem; }
+p  { margin: 0; color: var(--text-muted); }

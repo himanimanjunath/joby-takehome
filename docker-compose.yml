@@ -1,0 +1,63 @@
+# eBOM Explorer — take-home stack. Runs entirely locally: no AWS, no Lakebase,
+# no SSO. Start with:  docker compose up --build
+#
+#   frontend  → http://localhost:3000   (nginx-served SPA, no login)
+#   backend   → http://localhost:8000/api/docs  (FastAPI + Swagger)
+#   postgres  → localhost:5433          (seeded from db/initdb on first boot)
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ebom
+      POSTGRES_PASSWORD: ebom
+      POSTGRES_DB: ebom
+    ports:
+      # Host 5433 avoids clashing with a local Postgres on 5432. The backend
+      # still reaches it as `postgres:5432` on the compose network.
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      # Schema + seed run once, on an empty data volume, in filename order.
+      - ./db/initdb:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ebom -d ebom"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ebom-interview-backend:local
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ebom
+      PGUSER: ebom
+      PGPASSWORD: ebom
+      PGSSLMODE: disable
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Live-reload: edit backend/app on the host and uvicorn --reload picks it up.
+      - ./backend/app:/app/app
+    command: uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: http://localhost:8000/api
+    image: ebom-interview-frontend:local
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

@@ -1,0 +1,18 @@
+[project]
+name = "ebom-explorer"
+version = "0.1.0"
+description = "eBOM Explorer Dashboard Web App"
+readme = "README.md"
+requires-python = ">=3.14"
+# NOTE: take-home copy of the backend. The drawing/document/3D-viewer endpoints
+# and their AWS-S3 / blob-server services were removed, so boto3, pillow,
+# pypdfium2, requests, and cascadio (STEP->GLB, no linux/arm64 wheel) are gone.
+# The Databricks `pipeline` dependency-group was also dropped (irrelevant locally).
+dependencies = [
+    "fastapi>=0.115.0",
+    "psycopg[binary,pool]>=3.1.0",
+    "pydantic>=2.8.2",
+    "pydantic-settings>=2.13.1",
+    "python-dotenv>=1.0.1",
+    "uvicorn[standard]>=0.30.6",
+]
