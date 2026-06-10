@@ -66,3 +66,29 @@ containerized backend:
 ```bash
 cd frontend && npm install && npm run dev   # http://localhost:5174 (proxies /api → :8000)
 ```
+
+## What I built
+
+**Problem 1: MFG Class Chart (frontend)**
+
+Added MFG Class Distribution chart to the dashboard that counts the BOM's parts by manufacturing class and parts that have no class go to "(none)" so they aren't silently dropped. I wired this into the existing filter behavior (used by the "Source" chart) so clicking a bar filters the dashboard by manufacturing class.
+
+**Problem 2: Where-Used Feature (backend + frontend)**
+
+On the backend, I made a new `GET /bom/where-used` endpoint to return the direct parent assemblies that consume the part we're looking at. On the frontend side, I made a "Parent Assemblies" table at the bottom of the dashboard to display the results. I also included a clean empty state for the root / parts with no parents.
+
+## Key decisions made
+
+Overall, I spent most of my time reading through the codebase and then extending it/matching it. The majority of the code was already there, I just reused the existing structures wherever possible and adjusted them for the new functionalities.
+
+- **Problem 1:** For the MFG class chart, I mirrored the existing Source chart's data flow and structure.
+- **Problem 2:** I built the Where-Used endpoint to match the flow of the existing router/service/schema layering.
+- I queried `bom_relationships` for where-used instead of `bom_forest` that the forward queries used. The where-used feature only needs direct parents, so I found this table simpler and sufficient for this use case.
+- I used the existing `check_time` filtering to keep the where-used results consistent with the selected date.
+
+## If I had more time
+
+- **UI:** I tilted the current MFG class chart x-axis to fit the longer names. For more/longer category names or narrower screens, I'd implement truncation, tooltips, or a more responsive layout strategy.
+- **Code maintenance:** The source and MFG class distribution charts are very similar now, so I'd consider extracting a shared chart component to reduce the duplicated logic.
+- **Feature:** The assignment mentioned a compare revisions mode but I couldn't find an active compare workflow in this app. If such a view existed, I'd integrate the MFG class chart into it using the same pattern as the existing distribution chart.
+- **Where-used:** I'd enhance the Where-Used table to have sorting, filtering, etc. to match the Hierarchical BOM table more and make it more useful for exploring.
