@@ -84,6 +84,17 @@ export default function DataChart() {
     };
   }, [parts]);
 
+  const { mfgClassChartData } = useMemo(() => {
+   const mfgClassCounts = new Map<string, number>();
+   for (const p of parts){
+     const mfgClassKey = p.mfgclass ?? "(none)";
+     mfgClassCounts.set(mfgClassKey, (mfgClassCounts.get(mfgClassKey) ?? 0) + 1);
+   }
+   return {
+     mfgClassChartData: Array.from(mfgClassCounts, ([label, count]) => ({ label, count })),
+   }
+ }, [parts]);
+
   const totals = useMemo(() => {
     const totalWeight = statsQuery.data?.root_mass_g ?? null;
     return { partsCount: parts.length, totalWeight };
@@ -492,6 +503,36 @@ export default function DataChart() {
                 </BarChart>
               </ResponsiveContainer>
             </div>
+
+            <div className="dashboard-card">
+             <div className="card-header">
+               <h3>MFG Class Distribution</h3>
+               <span>{`${parts.length} parts`}</span>
+             </div>
+             <ResponsiveContainer width="100%" height={240}>
+               <BarChart data={mfgClassChartData as unknown[]}>
+                 <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                 <XAxis dataKey="label" tick={{ fontSize: 12 }} />
+                 <YAxis tick={{ fontSize: 12 }} />
+                 <Tooltip />
+                 <Bar
+                   dataKey="count"
+                   fill="#0ea5e9"
+                   radius={[6, 6, 0, 0]}
+                   onClick={(d, _i, e) => toggleDimensionValue("mfgclass", String((d as unknown as { label: string }).label), isAdditiveClick(e as unknown as MouseEvent | undefined))}
+                   cursor="pointer"
+                   activeBar={false}
+                 >
+                   {mfgClassChartData.map((d) => (
+                     <Cell
+                       key={`mfg-${d.label}`}
+                       fill={dimensionFilters.mfgclass.includes(d.label) ? "#0c4a6e" : "#0ea5e9"}
+                     />
+                   ))}
+                 </Bar>
+               </BarChart>
+             </ResponsiveContainer>
+           </div>
 
             <div className="dashboard-card heatmap-card">
               <div className="card-header">
