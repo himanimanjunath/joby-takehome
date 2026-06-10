@@ -80,7 +80,7 @@ export default function DataChart() {
   const { sourceChartData } = useMemo(() => {
     const sourceCounts = new Map<string, number>();
     for (const p of parts) {
-      const srcKey = p.source ?? "(none)";
+      const srcKey = p.source || "(none)";
       sourceCounts.set(srcKey, (sourceCounts.get(srcKey) ?? 0) + 1);
     }
     return {
@@ -91,7 +91,7 @@ export default function DataChart() {
   const { mfgClassChartData } = useMemo(() => {
    const mfgClassCounts = new Map<string, number>();
    for (const p of parts){
-     const mfgClassKey = p.mfgclass ?? "(none)";
+     const mfgClassKey = p.mfgclass || "(none)";
      mfgClassCounts.set(mfgClassKey, (mfgClassCounts.get(mfgClassKey) ?? 0) + 1);
    }
    return {
