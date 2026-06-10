@@ -16,6 +16,7 @@ import { usePartSearch } from "../lib/hooks/usePartSearch.ts";
 import { usePartDetail } from "../lib/hooks/usePartDetail.ts";
 import { useFilterOptions } from "../lib/hooks/useFilterOptions.ts";
 import { useDebounce } from "../lib/hooks/useDebounce.ts";
+import { useWhereUsed, type WhereUsedRow } from "../lib/hooks/useWhereUsed.ts";
 import {
   formatDateTime,
   formatNumber,
@@ -69,6 +70,9 @@ export default function DataChart() {
 
   const statsQuery = useBomStatistics(appliedId || null, appliedCheckTime);
   const parts: BomStatsPart[] = statsQuery.data?.parts ?? [];
+
+  const whereUsedQuery = useWhereUsed(appliedId || null, appliedCheckTime);
+  const whereUsedRows: WhereUsedRow[] = whereUsedQuery.data ?? [];
 
   const bomTreeQuery = useBomTree(appliedId || null, appliedCheckTime, appliedBomLevel, dimensionFilters);
   const treeRows = useMemo(() => bomTreeQuery.data ?? [], [bomTreeQuery.data]);
@@ -692,6 +696,35 @@ export default function DataChart() {
                   },
                 }}
                 emptyMessage="No tree data available."
+              />
+            </div>
+            <div className="dashboard-card table-card">
+              <div className="card-header">
+                <h3>Parent Assemblies (Where-Used)</h3>
+                <span>{appliedId}</span>
+              </div>
+              <DataTable
+                rows={whereUsedRows as unknown as TableRow[]}
+                columnLabels={{
+                  part_number: "Parent Part Number",
+                  part_description: "Description",
+                  child_quantity: "Quantity Used",
+                }}
+                cellRenderers={{
+                  part_number: (val) =>
+                    val != null ? (
+                      <button
+                        type="button"
+                        className="table-cell-link"
+                        onClick={() => handleAssemblySelect(String(val), appliedCheckTime, null)}
+                      >
+                        {String(val)}
+                      </button>
+                    ) : (
+                      <em style={{ color: "var(--text-subtle)" }}>—</em>
+                    ),
+                }}
+                emptyMessage="No parent assemblies use this part."
               />
             </div>
           </div>
